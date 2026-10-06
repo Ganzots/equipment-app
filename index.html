@@ -89,7 +89,7 @@
             </div>
           </div>
 
-          <!-- ШИНЭ Талбарууд: Тоо ба Хэмжих нэгж -->
+          <!-- Талбар: Тоо ширхэг ба Хэмжих нэгж -->
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Тоо ширхэг</label>
@@ -107,7 +107,7 @@
             </div>
           </div>
 
-          <!-- ШИНЭ Талбар: Ашиглалтад орсон он сар өдөр -->
+          <!-- Талбар: Ашиглалтад орсон он сар өдөр -->
           <div>
             <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Ашиглалтад орсон он</label>
             <input type="date" id="commissionDate" required class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm">
@@ -220,7 +220,7 @@
   <div id="print-section" class="hidden"></div>
 
   <script>
-    const GOOGLE_APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwB22DJiIbX1UUkktYfLVpDVA3DbeDP-l5NwyyHG6FZB4koojHlGz6jnGyXqJe_jVw/exec";
+    const GOOGLE_APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwB22DJiIbX1UUkktYfLVpDVA3DbeDP-I5NwyyHG6FZB4koojHlGz6jnGyXqJe_jVw/exec";
 
     let rawData = [];
     let currentFilteredData = [];
@@ -236,7 +236,7 @@
         applyFilters();
       } catch (err) {
         console.error("Fetch error:", err);
-        document.getElementById('data-list').innerHTML = `<tr><td colspan="8" class="p-4 text-center text-red-500">Мэдээлэл татахад алдаа гарлаа!</td></tr>`;
+        document.getElementById('data-list').innerHTML = '<tr><td colspan="8" class="p-4 text-center text-red-500">Мэдээлэл татахад алдаа гарлаа!</td></tr>';
       } finally {
         refreshIcon.classList.remove('fa-spin');
       }
@@ -296,7 +296,7 @@
     function renderTable(data) {
       const tbody = document.getElementById('data-list');
       if (!data || data.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" class="p-4 text-center text-slate-400">Тохирох төхөөрөмж олдсонгүй.</td></tr>`;
+        tbody.innerHTML = '<tr><td colspan="8" class="p-4 text-center text-slate-400">Тохирох төхөөрөмж олдсонгүй.</td></tr>';
         return;
       }
       tbody.innerHTML = data.map(item => `
@@ -342,7 +342,7 @@
       e.preventDefault();
       const btn = document.getElementById('submit-btn');
       btn.disabled = true;
-      btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Хадгалж байна...`;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Хадгалж байна...';
 
       const editId = document.getElementById('edit-id').value;
 
@@ -376,7 +376,7 @@
         alert('Алдаа гарлаа!');
       } finally {
         btn.disabled = false;
-        btn.innerHTML = `<i class="fa-solid fa-save"></i> Google Sheet-д хадгалах`;
+        btn.innerHTML = '<i class="fa-solid fa-save"></i> Google Sheet-д хадгалах';
       }
     }
 
@@ -393,7 +393,7 @@
       document.getElementById('ip').value = item.ip || '';
       document.getElementById('owner').value = item.owner || '';
 
-      document.getElementById('form-title').innerHTML = `<i class="fa-solid fa-pen-to-square text-blue-600"></i> Төхөөрөмж Засах`;
+      document.getElementById('form-title').innerHTML = '<i class="fa-solid fa-pen-to-square text-blue-600"></i> Төхөөрөмж Засах';
       document.getElementById('cancel-btn').classList.remove('hidden');
     }
 
@@ -401,7 +401,7 @@
       document.getElementById('edit-id').value = '';
       document.getElementById('equip-form').reset();
       document.getElementById('qty').value = 1;
-      document.getElementById('form-title').innerHTML = `<i class="fa-solid fa-plus-circle text-blue-600"></i> Шинэ Төхөөрөмж Бүртгэх`;
+      document.getElementById('form-title').innerHTML = '<i class="fa-solid fa-plus-circle text-blue-600"></i> Шинэ Төхөөрөмж Бүртгэх';
       document.getElementById('cancel-btn').classList.add('hidden');
     }
 
