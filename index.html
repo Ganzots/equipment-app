@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Тоног Төхөөрөмжийн Бүртгэл1</title>
+  <title>Тоног Төхөөрөмжийн Бүртгэлийн Систем V1.0</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -29,11 +29,13 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       
       <!-- Form -->
-      <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-        <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+      <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 h-fit">
+        <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2" id="form-title">
           <i class="fa-solid fa-plus-circle text-blue-600"></i> Шинэ Төхөөрөмж Бүртгэх
         </h2>
         <form id="equip-form" onsubmit="handleSubmit(event)" class="space-y-4">
+          <input type="hidden" id="edit-id" value="">
+          
           <div>
             <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Нэр / Модель</label>
             <input type="text" id="name" required placeholder="Меркурий 234 / Teltonika TRB145" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm">
@@ -46,8 +48,8 @@
             <div>
               <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Ангилал</label>
               <select id="category" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm">
-                <option value="Тоолуур">Тоолуур</option>
-                <option value="Модем / Хөрвүүлэгч">Модем / Хөрвүүлэгч</option>
+                <option value="Мэдэгч/Тоолуур">Мэдэгч/Тоолуур</option>
+                <option value="Модем/Хөрвүүлэгч">Модем/Хөрвүүлэгч</option>
                 <option value="Сүлжээний төхөөрөмж">Сүлжээний төхөөрөмж</option>
                 <option value="Бусад">Бусад</option>
               </select>
@@ -63,43 +65,86 @@
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Байршил / Дэд станц</label>
-            <input type="text" id="location" required placeholder="Чойр ДС / Бөөрөлжүүт" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm">
+            <input type="text" id="location" required placeholder="Чойр дэд станц" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm">
           </div>
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">IP хаяг</label>
-              <input type="text" id="ip" placeholder="192.168.1.100" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm">
+              <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">IP / Порт</label>
+              <input type="text" id="ip" placeholder="192.168.10.45:4001" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm">
             </div>
             <div>
               <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Хариуцагч</label>
-              <input type="text" id="owner" required placeholder="Инженер" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm">
+              <input type="text" id="owner" required placeholder="Г.Амаржаргал" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm">
             </div>
           </div>
-          <button type="submit" id="submit-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-lg transition text-sm flex justify-center items-center gap-2">
-            <i class="fa-solid fa-save"></i> Google Sheet-д хадгалах
-          </button>
+          <div class="flex gap-2 pt-2">
+            <button type="submit" id="submit-btn" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-lg transition text-sm flex justify-center items-center gap-2">
+              <i class="fa-solid fa-save"></i> Google Sheet-д хадгалах
+            </button>
+            <button type="button" id="cancel-btn" onclick="resetForm()" class="hidden bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2.5 rounded-lg text-sm font-medium transition">
+              Цуцлах
+            </button>
+          </div>
         </form>
       </div>
 
       <!-- Table View -->
       <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-        <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-          <i class="fa-solid fa-list text-blue-600"></i> Бүртгэлтэй Төхөөрөмжүүд
-        </h2>
+        <!-- Controls & Filters -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+          <div>
+            <h2 class="text-lg font-bold text-slate-800">Бүртгэлтэй төхөөрөмжүүд</h2>
+            <p class="text-xs text-slate-500 mt-0.5">Шүүгдсэн: <span id="filtered-count" class="font-bold text-blue-600">0</span></p>
+          </div>
+          
+          <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
+            <!-- Search -->
+            <div class="relative flex-1 md:w-56">
+              <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+              <input type="text" id="search-input" oninput="applyFilters()" placeholder="Нэр, S/N, Байршил, IP-ээр хайх" class="w-full pl-8 pr-3 py-1.5 border rounded-lg text-xs focus:ring-2 focus:ring-blue-500">
+            </div>
+
+            <!-- Category Filter -->
+            <select id="filter-category" onchange="applyFilters()" class="border rounded-lg px-2 py-1.5 text-xs text-slate-600 bg-white">
+              <option value="">Бүх ангилал</option>
+              <option value="Мэдэгч/Тоолуур">Мэдэгч/Тоолуур</option>
+              <option value="Модем/Хөрвүүлэгч">Модем/Хөрвүүлэгч</option>
+              <option value="Сүлжээний төхөөрөмж">Сүлжээний төхөөрөмж</option>
+              <option value="Бусад">Бусад</option>
+            </select>
+
+            <!-- Status Filter -->
+            <select id="filter-status" onchange="applyFilters()" class="border rounded-lg px-2 py-1.5 text-xs text-slate-600 bg-white">
+              <option value="">Бүх төлөв</option>
+              <option value="Ашиглагдаж байгаа">Ашиглагдаж байгаа</option>
+              <option value="Бэлтгэлд байгаа">Бэлтгэлд байгаа</option>
+              <option value="Засвартай">Засвартай</option>
+            </select>
+
+            <!-- CSV Export -->
+            <button onclick="exportToCSV()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition flex items-center gap-1.5">
+              <i class="fa-solid fa-file-excel"></i> CSV Татах
+            </button>
+          </div>
+        </div>
+
+        <!-- Table -->
         <div class="overflow-x-auto">
-          <table class="w-full text-left text-sm text-slate-600">
-            <thead class="bg-slate-50 text-slate-700 uppercase text-xs">
+          <table class="w-full text-left text-xs text-slate-600">
+            <thead class="bg-slate-50 text-slate-700 uppercase font-semibold">
               <tr>
-                <th class="p-3">Нэр & S/N</th>
-                <th class="p-3">Ангилал</th>
-                <th class="p-3">Байршил</th>
-                <th class="p-3">Төлөв</th>
-                <th class="p-3">Хариуцагч</th>
+                <th class="p-3">СЕРИЙН ДУГААР</th>
+                <th class="p-3">АНГИЛАЛ</th>
+                <th class="p-3">БАЙРШИЛ</th>
+                <th class="p-3">ТӨЛӨВ</th>
+                <th class="p-3">IP / ПОРТ</th>
+                <th class="p-3">ХАРИУЦАГЧ</th>
+                <th class="p-3 text-right">ҮЙЛДЭЛ</th>
               </tr>
             </thead>
             <tbody id="data-list" class="divide-y">
               <tr>
-                <td colspan="5" class="p-4 text-center text-slate-400">Мэдээлэл уншиж байна...</td>
+                <td colspan="7" class="p-4 text-center text-slate-400">Мэдээлэл уншиж байна...</td>
               </tr>
             </tbody>
           </table>
@@ -110,46 +155,82 @@
   </div>
 
   <script>
-    const GOOGLE_APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwB22DJiIbX1UUkktYfLVpDVA3DbeDP-l5NwyyHG6FZB4koojHlGz6jnGyXqJe_jVw/exec";
+    // Google App Script URL
+    const GOOGLE_APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwB22DJiIbX1UUkktYfLVpDVA3DbeDP-I5NwyyHG6FZB4koojHlGz6jnGyXqJe_jVw/exec";
+
+    let rawData = [];
 
     async function fetchData() {
       const refreshIcon = document.getElementById('refresh-icon');
       refreshIcon.classList.add('fa-spin');
       try {
-        const res = await fetch(GOOGLE_APP_SCRIPT_URL);
-        const data = await res.json();
-        renderTable(data);
+        const res = await fetch(GOOGLE_APP_SCRIPT_URL, { redirect: 'follow' });
+        rawData = await res.json();
+        applyFilters();
       } catch (err) {
         console.error(err);
-        document.getElementById('data-list').innerHTML = `<tr><td colspan="5" class="p-4 text-center text-red-500">Мэдээлэл татахад алдаа гарлаа!</td></tr>`;
+        document.getElementById('data-list').innerHTML = `<tr><td colspan="7" class="p-4 text-center text-red-500">Мэдээлэл татахад алдаа гарлаа!</td></tr>`;
       } finally {
         refreshIcon.classList.remove('fa-spin');
       }
     }
 
+    function applyFilters() {
+      const search = document.getElementById('search-input').value.toLowerCase();
+      const cat = document.getElementById('filter-category').value;
+      const status = document.getElementById('filter-status').value;
+
+      const filtered = rawData.filter(item => {
+        const matchSearch = !search || 
+          (item.name && item.name.toLowerCase().includes(search)) ||
+          (item.sn && item.sn.toLowerCase().includes(search)) ||
+          (item.location && item.location.toLowerCase().includes(search)) ||
+          (item.ip && item.ip.toLowerCase().includes(search)) ||
+          (item.owner && item.owner.toLowerCase().includes(search));
+
+        const matchCat = !cat || item.category === cat;
+        const matchStatus = !status || item.status === status;
+
+        return matchSearch && matchCat && matchStatus;
+      });
+
+      document.getElementById('filtered-count').innerText = filtered.length;
+      renderTable(filtered);
+    }
+
     function renderTable(data) {
       const tbody = document.getElementById('data-list');
       if (!data || data.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-400">Бүртгэгдсэн төхөөрөмж байхгүй байна.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-slate-400">Тохирох төхөөрөмж олдсонгүй.</td></tr>`;
         return;
       }
       tbody.innerHTML = data.map(item => `
-        <tr class="hover:bg-slate-50">
+        <tr class="hover:bg-slate-50 transition">
+          <td class="p-3 font-semibold text-slate-800">${item.sn || '-'}</td>
+          <td class="p-3"><span class="bg-slate-100 text-slate-700 px-2 py-0.5 rounded border border-slate-200">${item.category || '-'}</span></td>
           <td class="p-3">
-            <div class="font-bold text-slate-800">${item.name}</div>
-            <div class="text-xs text-slate-400">S/N: ${item.sn}</div>
+            <div class="flex items-center gap-1">
+              <i class="fa-solid fa-location-dot text-slate-400"></i> ${item.location || '-'}
+            </div>
           </td>
-          <td class="p-3"><span class="bg-slate-100 text-slate-700 px-2 py-0.5 rounded text-xs">${item.category}</span></td>
-          <td class="p-3">${item.location} <br><span class="text-xs text-slate-400">${item.ip || '-'}</span></td>
           <td class="p-3">
-            <span class="px-2 py-0.5 rounded-full text-xs font-semibold ${
-              item.status === 'Ашиглагдаж байгаа' ? 'bg-green-100 text-green-700' :
-              item.status === 'Бэлтгэлд байгаа' ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700'
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold inline-flex items-center gap-1 ${
+              item.status === 'Ашиглагдаж байгаа' ? 'bg-emerald-100 text-emerald-700' :
+              item.status === 'Бэлтгэлд байгаа' ? 'bg-amber-100 text-amber-700' : 'bg-rose-100 text-rose-700'
             }">
-              ${item.status}
+              ● ${item.status || '-'}
             </span>
           </td>
-          <td class="p-3">${item.owner}</td>
+          <td class="p-3 font-mono text-slate-500">${item.ip || '-'}</td>
+          <td class="p-3">
+            <div class="flex items-center gap-1">
+              <i class="fa-solid fa-user text-slate-400"></i> ${item.owner || '-'}
+            </div>
+          </td>
+          <td class="p-3 text-right">
+            <button onclick='editItem(${JSON.stringify(item)})' class="text-blue-600 hover:text-blue-800 px-1"><i class="fa-solid fa-pen-to-square"></i></button>
+            <button onclick='deleteItem("${item.id}")' class="text-rose-600 hover:text-rose-800 px-1"><i class="fa-solid fa-trash"></i></button>
+          </td>
         </tr>
       `).join('');
     }
@@ -160,8 +241,11 @@
       btn.disabled = true;
       btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Хадгалж байна...`;
 
+      const editId = document.getElementById('edit-id').value;
+
       const payload = {
-        id: 'EQ-' + Date.now().toString().slice(-6),
+        action: editId ? 'update' : 'create',
+        id: editId || ('EQ-' + Date.now().toString().slice(-6)),
         name: document.getElementById('name').value,
         sn: document.getElementById('sn').value,
         category: document.getElementById('category').value,
@@ -180,7 +264,7 @@
           body: JSON.stringify(payload)
         });
 
-        document.getElementById('equip-form').reset();
+        resetForm();
         setTimeout(fetchData, 1500);
       } catch (err) {
         alert('Алдаа гарлаа!');
@@ -188,6 +272,64 @@
         btn.disabled = false;
         btn.innerHTML = `<i class="fa-solid fa-save"></i> Google Sheet-д хадгалах`;
       }
+    }
+
+    function editItem(item) {
+      document.getElementById('edit-id').value = item.id;
+      document.getElementById('name').value = item.name || '';
+      document.getElementById('sn').value = item.sn || '';
+      document.getElementById('category').value = item.category || 'Мэдэгч/Тоолуур';
+      document.getElementById('status').value = item.status || 'Ашиглагдаж байгаа';
+      document.getElementById('location').value = item.location || '';
+      document.getElementById('ip').value = item.ip || '';
+      document.getElementById('owner').value = item.owner || '';
+
+      document.getElementById('form-title').innerHTML = `<i class="fa-solid fa-pen-to-square text-blue-600"></i> Төхөөрөмж Засах`;
+      document.getElementById('cancel-btn').classList.remove('hidden');
+    }
+
+    function resetForm() {
+      document.getElementById('edit-id').value = '';
+      document.getElementById('equip-form').reset();
+      document.getElementById('form-title').innerHTML = `<i class="fa-solid fa-plus-circle text-blue-600"></i> Шинэ Төхөөрөмж Бүртгэх`;
+      document.getElementById('cancel-btn').classList.add('hidden');
+    }
+
+    async function deleteItem(id) {
+      if (!confirm('Энэ төхөөрөмжийг устгахдаа итгэлтэй байна уу?')) return;
+      
+      try {
+        await fetch(GOOGLE_APP_SCRIPT_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'delete', id: id })
+        });
+        setTimeout(fetchData, 1500);
+      } catch (err) {
+        alert('Устгахад алдаа гарлаа!');
+      }
+    }
+
+    function exportToCSV() {
+      if (!rawData || rawData.length === 0) {
+        alert('Татах дата олдсонгүй!');
+        return;
+      }
+      let csv = '\uFEFF'; // UTF-8 BOM
+      csv += 'ID,Нэр,Серийн дугаар,Ангилал,Байршил,Төлөв,IP хаяг,Огноо,Хариуцагч\n';
+      
+      rawData.forEach(row => {
+        csv += `"${row.id || ''}","${row.name || ''}","${row.sn || ''}","${row.category || ''}","${row.location || ''}","${row.status || ''}","${row.ip || ''}","${row.date || ''}","${row.owner || ''}"\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.setAttribute('download', `Equipment_Export_${new Date().toISOString().split('T')[0]}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
 
     fetchData();
