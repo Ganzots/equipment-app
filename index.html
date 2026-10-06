@@ -10,7 +10,6 @@
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
   <style>
-    /* Хэвлэх/PDF гаргах үеийн тусгай стиль */
     @media print {
       body * {
         visibility: hidden;
@@ -124,10 +123,15 @@
           
           <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
             <!-- Search -->
-            <div class="relative flex-1 md:w-48">
+            <div class="relative flex-1 md:w-36">
               <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
-              <input type="text" id="search-input" oninput="applyFilters()" placeholder="Нэр, S/N, Байршил, IP-ээр хайх" class="w-full pl-8 pr-3 py-1.5 border rounded-lg text-xs focus:ring-2 focus:ring-blue-500">
+              <input type="text" id="search-input" oninput="applyFilters()" placeholder="Хайх..." class="w-full pl-8 pr-3 py-1.5 border rounded-lg text-xs focus:ring-2 focus:ring-blue-500">
             </div>
+
+            <!-- Location Filter (Байршлаар шүүх шинэ Dropdown) -->
+            <select id="filter-location" onchange="applyFilters()" class="border rounded-lg px-2 py-1.5 text-xs text-slate-600 bg-white max-w-[140px]">
+              <option value="">Бүх байршил</option>
+            </select>
 
             <!-- Category Filter -->
             <select id="filter-category" onchange="applyFilters()" class="border rounded-lg px-2 py-1.5 text-xs text-slate-600 bg-white">
@@ -153,7 +157,7 @@
 
             <!-- PDF Report Button -->
             <button onclick="printPDFReport()" class="bg-rose-600 hover:bg-rose-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition flex items-center gap-1.5">
-              <i class="fa-solid fa-print"></i> Тайлан (PDF)
+              <i class="fa-solid fa-print"></i> Тайлан
             </button>
           </div>
         </div>
@@ -184,7 +188,6 @@
     </div>
   </div>
 
-  <!-- Хэвлэх болон PDF болгоход ашиглагдах нууц хэсэг -->
   <div id="print-section" class="hidden"></div>
 
   <script>
@@ -200,6 +203,7 @@
         const res = await fetch(GOOGLE_APP_SCRIPT_URL, { redirect: 'follow' });
         const data = await res.json();
         rawData = Array.isArray(data) ? data : [];
+        populateLocationFilter(rawData);
         applyFilters();
       } catch (err) {
         console.error("Fetch error:", err);
@@ -207,6 +211,24 @@
       } finally {
         refreshIcon.classList.remove('fa-spin');
       }
+    }
+
+    // БАЙРШЛУУДЫГ ТАТАЖ DROPDOWN ЖАГСААЛТАД ОРУУЛАХ ФУНКЦ
+    function populateLocationFilter(data) {
+      const locationSelect = document.getElementById('filter-location');
+      const currentValue = locationSelect.value;
+      
+      const locations = [...new Set(data.map(item => item.location).filter(Boolean))].sort();
+
+      locationSelect.innerHTML = '<option value="">Бүх байршил</option>';
+      locations.forEach(loc => {
+        const option = document.createElement('option');
+        option.value = loc;
+        option.textContent = loc;
+        locationSelect.appendChild(option);
+      });
+
+      locationSelect.value = currentValue;
     }
 
     function formatDate(rawDate) {
@@ -220,6 +242,7 @@
 
     function applyFilters() {
       const search = document.getElementById('search-input').value.toLowerCase();
+      const loc = document.getElementById('filter-location').value;
       const cat = document.getElementById('filter-category').value;
       const status = document.getElementById('filter-status').value;
 
@@ -231,10 +254,11 @@
           (item.ip && String(item.ip).toLowerCase().includes(search)) ||
           (item.owner && String(item.owner).toLowerCase().includes(search));
 
+        const matchLoc = !loc || item.location === loc;
         const matchCat = !cat || item.category === cat;
         const matchStatus = !status || item.status === status;
 
-        return matchSearch && matchCat && matchStatus;
+        return matchSearch && matchLoc && matchCat && matchStatus;
       });
 
       document.getElementById('filtered-count').innerText = currentFilteredData.length;
@@ -387,7 +411,6 @@
       XLSX.writeFile(workbook, `Equipment_Export_${new Date().toISOString().split('T')[0]}.xlsx`);
     }
 
-    // МОНГОЛ ҮСЭГ ОГТ ЗАДРАХГҮЙ, ЦЭВЭРХЭН PDF/PRINT ТАЙЛАН БЭЛТГЭХ ФУНКЦ
     function printPDFReport() {
       const dataToExport = currentFilteredData.length > 0 ? currentFilteredData : rawData;
       if (!dataToExport || dataToExport.length === 0) {
@@ -411,7 +434,6 @@
             </div>
           </div>
 
-          <!-- Тоон хураангуй -->
           <div style="display: flex; gap: 10px; margin-bottom: 20px; background: #f8fafc; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0; font-size: 12px;">
             <div style="flex: 1;"><b>Нийт төхөөрөмж:</b> ${total}</div>
             <div style="flex: 1; color: #166534;"><b>Ашиглагдаж буй:</b> ${active}</div>
@@ -419,7 +441,6 @@
             <div style="flex: 1; color: #be123c;"><b>Засвартай:</b> ${repair}</div>
           </div>
 
-          <!-- Хүснэгт -->
           <table style="width: 100%; border-collapse: collapse; font-size: 11px; text-align: left;">
             <thead>
               <tr style="background-color: #2563eb; color: white;">
@@ -448,7 +469,6 @@
             </tbody>
           </table>
 
-          <!-- Баталгаажуулах хэсэг -->
           <div style="margin-top: 40px; font-size: 12px; color: #475569; display: flex; flex-direction: column; gap: 15px;">
             <div>Тайлан гаргасан инженер: ....................................... /                            /</div>
             <div>Хянасан ахлах инженер: ....................................... /                            /</div>
