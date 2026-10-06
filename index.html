@@ -155,7 +155,7 @@
   </div>
 
   <script>
-    const GOOGLE_APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwB22DJiIbX1UUkktYfLVpDVA3DbeDP-l5NwyyHG6FZB4koojHlGz6jnGyXqJe_jVw/exec";
+    const GOOGLE_APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwB22DJiIbX1UUkktYfLVpDVA3DbeDP-I5NwyyHG6FZB4koojHlGz6jnGyXqJe_jVw/exec";
 
     let rawData = [];
     let currentFilteredData = [];
@@ -165,7 +165,8 @@
       refreshIcon.classList.add('fa-spin');
       try {
         const res = await fetch(GOOGLE_APP_SCRIPT_URL, { redirect: 'follow' });
-        rawData = await res.json();
+        const data = await res.json();
+        rawData = Array.isArray(data) ? data : [];
         applyFilters();
       } catch (err) {
         console.error("Fetch error:", err);
@@ -191,11 +192,11 @@
 
       currentFilteredData = rawData.filter(item => {
         const matchSearch = !search || 
-          (item.name && item.name.toLowerCase().includes(search)) ||
-          (item.sn && item.sn.toLowerCase().includes(search)) ||
-          (item.location && item.location.toLowerCase().includes(search)) ||
-          (item.ip && item.ip.toLowerCase().includes(search)) ||
-          (item.owner && item.owner.toLowerCase().includes(search));
+          (item.name && String(item.name).toLowerCase().includes(search)) ||
+          (item.sn && String(item.sn).toLowerCase().includes(search)) ||
+          (item.location && String(item.location).toLowerCase().includes(search)) ||
+          (item.ip && String(item.ip).toLowerCase().includes(search)) ||
+          (item.owner && String(item.owner).toLowerCase().includes(search));
 
         const matchCat = !cat || item.category === cat;
         const matchStatus = !status || item.status === status;
@@ -323,7 +324,7 @@
       }
     }
 
-    // Excel дээр багана тус бүрээр салгаж цэгцтэй нээх CSV экспорт
+    // Монгол үсэг задрахгүй, Excel дээр салангид баганатай нээх CSV экспорт
     function exportToCSV() {
       const dataToExport = currentFilteredData.length > 0 ? currentFilteredData : rawData;
       if (!dataToExport || dataToExport.length === 0) {
@@ -331,16 +332,17 @@
         return;
       }
 
-      // sep=, заагчийг эхэнд нь бичсэнээр Excel автоматаар салангид баганад оруулна
-      let csv = 'sep=,\n\uFEFF'; 
-      csv += 'ID,Нэр,Серийн дугаар,Ангилал,Байршил,Төлөв,IP хаяг,Огноо,Хариуцагч\n';
+      // sep=, заагчийг эхэнд нь оруулаад шинэ мөр авна
+      let csvContent = 'sep=,\n';
+      csvContent += 'ID,Нэр,Серийн дугаар,Ангилал,Байршил,Төлөв,IP хаяг,Огноо,Хариуцагч\n';
       
       dataToExport.forEach(row => {
         const cleanDate = formatDate(row.date);
-        csv += `"${row.id || ''}","${row.name || ''}","${row.sn || ''}","${row.category || ''}","${row.location || ''}","${row.status || ''}","${row.ip || ''}","${cleanDate}","${row.owner || ''}"\n`;
+        csvContent += `"${row.id || ''}","${row.name || ''}","${row.sn || ''}","${row.category || ''}","${row.location || ''}","${row.status || ''}","${row.ip || ''}","${cleanDate}","${row.owner || ''}"\n`;
       });
 
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      // UTF-8 BOM (\uFEFF)-ийг Blob уруу дамжуулахдаа оруулах нь MS Excel-ийг монгол үсгийг зөв танихад тусална
+      const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
       link.setAttribute('download', `Equipment_Export_${new Date().toISOString().split('T')[0]}.csv`);
