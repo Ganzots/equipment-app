@@ -166,7 +166,7 @@
             </select>
 
              <!-- Location Filter -->
-            <select id="filter-name" onchange="applyFilters()" class="border rounded-lg px-2 py-1.5 text-xs text-slate-600 bg-white max-w-[130px]">
+            <select id="filter-device" onchange="applyFilters()" class="border rounded-lg px-2 py-1.5 text-xs text-slate-600 bg-white max-w-[130px]">
               <option value="">Төхөөрөмжүүд</option>
             </select>
             
@@ -243,6 +243,7 @@
         const data = await res.json();
         rawData = Array.isArray(data) ? data : [];
         populateLocationFilter(rawData);
+        populateDeviceFilter(rawData);
         applyFilters();
       } catch (err) {
         console.error("Fetch error:", err);
@@ -268,7 +269,23 @@
 
       locationSelect.value = currentValue;
     }
+function populateDeviceFilter(data) {
+      const deviceSelect = document.getElementById('filter-device');
+      if (!deviceSelect) return;
+      const currentValue = deviceSelect.value;
+      
+      const devices = [...new Set(data.map(item => item.name).filter(Boolean))].sort();
 
+      deviceSelect.innerHTML = '<option value="">Төхөөрөмжүүд</option>';
+      devices.forEach(dev => {
+        const option = document.createElement('option');
+        option.value = dev;
+        option.textContent = dev;
+        deviceSelect.appendChild(option);
+      });
+
+      deviceSelect.value = currentValue;
+    }
     function formatDate(rawDate) {
       if (!rawDate) return '';
       const str = String(rawDate);
@@ -281,6 +298,7 @@
     function applyFilters() {
       const search = document.getElementById('search-input').value.toLowerCase();
       const loc = document.getElementById('filter-location').value;
+      const device = document.getElementById('filter-device').value;
       const cat = document.getElementById('filter-category').value;
       const status = document.getElementById('filter-status').value;
 
@@ -293,10 +311,11 @@
           (item.owner && String(item.owner).toLowerCase().includes(search));
 
         const matchLoc = !loc || item.location === loc;
+        const matchDevice = !device || item.name === device;
         const matchCat = !cat || item.category === cat;
         const matchStatus = !status || item.status === status;
 
-        return matchSearch && matchLoc && matchCat && matchStatus;
+        return matchSearch && matchLoc && matchDevice && matchCat && matchStatus;
       });
 
       document.getElementById('filtered-count').innerText = currentFilteredData.length;
