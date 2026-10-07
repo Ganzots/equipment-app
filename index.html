@@ -505,7 +505,7 @@
                     <b>${item.sn || '-'}</b><br>
                     <span style="font-size: 10px; color: #64748b;">${item.name || ''}</span>
                   </td>
-                  <td style="padding: 6px 8px; border: 1px solid #cbd5e1;">${item.qty \vert{}\vert{} 1}${item.unit || 'ширхэг'}</td>
+                  <td style="padding: 6px 8px; border: 1px solid #cbd5e1;">${item.qty || 1} ${item.unit || 'ширхэг'}</td>
                   <td style="padding: 6px 8px; border: 1px solid #cbd5e1;">${formatDate(item.commissionDate) || '-'}</td>
                   <td style="padding: 6px 8px; border: 1px solid #cbd5e1;">${item.location || '-'}</td>
                   <td style="padding: 6px 8px; border: 1px solid #cbd5e1;">${item.status || '-'}</td>
