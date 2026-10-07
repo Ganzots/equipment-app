@@ -62,7 +62,7 @@
           
           <div>
             <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Нэр / Модель</label>
-            <input type="text" id="name" required placeholder="MOXA NPORT / Meanwell PS220A/24VDC" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm">
+            <input type="text" id="name" required placeholder="MOXA NPORT /  Meanwell PS220A/24VDC" class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm">
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Хөрөнгийн дугаар</label>
@@ -160,20 +160,22 @@
               <input type="text" id="search-input" oninput="applyFilters()" placeholder="Хайх..." class="w-full pl-8 pr-3 py-1.5 border rounded-lg text-xs focus:ring-2 focus:ring-blue-500">
             </div>
 
-            <!-- Location Filter (Зөвхөн ганц байршил шүүгч үлдээсэн) -->
+            <!-- Location Filter -->
             <select id="filter-location" onchange="applyFilters()" class="border rounded-lg px-2 py-1.5 text-xs text-slate-600 bg-white max-w-[130px]">
               <option value="">Бүх байршил</option>
+            </select>
+
+             <!-- Location Filter -->
+            <select id="filter-location" onchange="applyFilters()" class="border rounded-lg px-2 py-1.5 text-xs text-slate-600 bg-white max-w-[130px]">
+              <option value="">Бүх төхөөрөмж</option>
             </select>
             
             <!-- Category Filter -->
             <select id="filter-category" onchange="applyFilters()" class="border rounded-lg px-2 py-1.5 text-xs text-slate-600 bg-white">
               <option value="">Бүх ангилал</option>
-              <option value="Тоолуур">Тоолуур</option>
-              <option value="Сервер">Сервер</option>
-              <option value="Тэжээлийн хэсэг">Тэжээлийн хэсэг</option>
+              <option value="Мэдэгч/Тоолуур">Мэдэгч/Тоолуур</option>
               <option value="Модем/Хөрвүүлэгч">Модем/Хөрвүүлэгч</option>
               <option value="Сүлжээний төхөөрөмж">Сүлжээний төхөөрөмж</option>
-              <option value="Кабель">Кабель</option>
               <option value="Бусад">Бусад</option>
             </select>
 
@@ -181,9 +183,8 @@
             <select id="filter-status" onchange="applyFilters()" class="border rounded-lg px-2 py-1.5 text-xs text-slate-600 bg-white">
               <option value="">Бүх төлөв</option>
               <option value="Ашиглагдаж байгаа">Ашиглагдаж байгаа</option>
-              <option value="Нөөцөд байгаа">Нөөцөд байгаа</option>
-              <option value="Гэмтэлтэй">Гэмтэлтэй</option>
-              <option value="Актлагдсан">Актлагдсан</option>
+              <option value="Бэлтгэлд байгаа">Бэлтгэлд байгаа</option>
+              <option value="Засвартай">Засвартай</option>
             </select>
 
             <!-- Excel Export Button -->
@@ -203,7 +204,7 @@
           <table class="w-full text-left text-xs text-slate-600">
             <thead class="bg-slate-50 text-slate-700 uppercase font-semibold">
               <tr>
-                <th class="p-3">ХӨРӨНГӨНИЙ ДУГААР & НЭР</th>
+                <th class="p-3">СЕРИЙН ДУГААР & НЭР</th>
                 <th class="p-3">ТОО / НЭГЖ</th>
                 <th class="p-3">АШИГЛАЛТАД ОРСОН</th>
                 <th class="p-3">БАЙРШИЛ</th>
@@ -228,6 +229,7 @@
   <div id="print-section" class="hidden"></div>
 
   <script>
+    // Энд өөрийн Apps Script-ийн Web App URL хаягаа бүтнээр нь зөв тавьсан эсэхээ шалгаарай
     const GOOGLE_APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwB22DJiIbX1UUkktYfLVpDVA3DbeDP-l5NwyyHG6FZB4koojHlGz6jnGyXqJe_jVw/exec";
 
     let rawData = [];
@@ -327,8 +329,7 @@
           <td class="p-3">
             <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold inline-flex items-center gap-1 ${
               item.status === 'Ашиглагдаж байгаа' ? 'bg-emerald-100 text-emerald-700' :
-              item.status === 'Нөөцөд байгаа' ? 'bg-amber-100 text-amber-700' : 
-              item.status === 'Гэмтэлтэй' ? 'bg-rose-100 text-rose-700' : 'bg-slate-200 text-slate-700'
+              item.status === 'Бэлтгэлд байгаа' ? 'bg-amber-100 text-amber-700' : 'bg-rose-100 text-rose-700'
             }">
               ● ${item.status || '-'}
             </span>
@@ -393,7 +394,7 @@
       document.getElementById('edit-id').value = item.id;
       document.getElementById('name').value = item.name || '';
       document.getElementById('sn').value = item.sn || '';
-      document.getElementById('category').value = item.category || 'Тоолуур';
+      document.getElementById('category').value = item.category || 'Мэдэгч/Тоолуур';
       document.getElementById('status').value = item.status || 'Ашиглагдаж байгаа';
       document.getElementById('qty').value = item.qty || 1;
       document.getElementById('unit').value = item.unit || 'ширхэг';
@@ -410,7 +411,7 @@
       document.getElementById('edit-id').value = '';
       document.getElementById('equip-form').reset();
       document.getElementById('qty').value = 1;
-      document.getElementById('form-title').innerHTML = '<i class="fa-solid fa-plus-circle text-blue-600"></i> Төхөөрөмж Бүртгэх';
+      document.getElementById('form-title').innerHTML = '<i class="fa-solid fa-plus-circle text-blue-600"></i> Шинэ Төхөөрөмж Бүртгэх';
       document.getElementById('cancel-btn').classList.add('hidden');
     }
 
@@ -473,8 +474,8 @@
 
       const total = dataToExport.length;
       const active = dataToExport.filter(d => d.status === 'Ашиглагдаж байгаа').length;
-      const standby = dataToExport.filter(d => d.status === 'Нөөцөд байгаа').length;
-      const repair = dataToExport.filter(d => d.status === 'Гэмтэлтэй').length;
+      const standby = dataToExport.filter(d => d.status === 'Бэлтгэлд байгаа').length;
+      const repair = dataToExport.filter(d => d.status === 'Засвартай').length;
 
       const printArea = document.getElementById('print-section');
       
@@ -490,14 +491,14 @@
           <div style="display: flex; gap: 10px; margin-bottom: 20px; background: #f8fafc; padding: 12px; border-radius: 6px; border: 1px solid #e2e8f0; font-size: 12px;">
             <div style="flex: 1;"><b>Нийт төхөөрөмж:</b> ${total}</div>
             <div style="flex: 1; color: #166534;"><b>Ашиглагдаж буй:</b> ${active}</div>
-            <div style="flex: 1; color: #b45309;"><b>Нөөцөд:</b> ${standby}</div>
-            <div style="flex: 1; color: #be123c;"><b>Гэмтэлтэй:</b> ${repair}</div>
+            <div style="flex: 1; color: #b45309;"><b>Бэлтгэлд:</b> ${standby}</div>
+            <div style="flex: 1; color: #be123c;"><b>Засвартай:</b> ${repair}</div>
           </div>
 
           <table style="width: 100%; border-collapse: collapse; font-size: 11px; text-align: left;">
             <thead>
               <tr style="background-color: #2563eb; color: white;">
-                <th style="padding: 8px; border: 1px solid #cbd5e1;">Хөрөнгийн дугаар & Нэр</th>
+                <th style="padding: 8px; border: 1px solid #cbd5e1;">S/N & Нэр</th>
                 <th style="padding: 8px; border: 1px solid #cbd5e1;">Тоо / Нэгж</th>
                 <th style="padding: 8px; border: 1px solid #cbd5e1;">Ашиглалтад орсон</th>
                 <th style="padding: 8px; border: 1px solid #cbd5e1;">Байршил</th>
@@ -513,7 +514,7 @@
                     <b>${item.sn || '-'}</b><br>
                     <span style="font-size: 10px; color: #64748b;">${item.name || ''}</span>
                   </td>
-                  <td style="padding: 6px 8px; border: 1px solid #cbd5e1;">${item.qty \vert{}\vert{} 1}${item.unit || 'ширхэг'}</td>
+                  <td style="padding: 6px 8px; border: 1px solid #cbd5e1;">${item.qty || 1} ${item.unit || 'ширхэг'}</td>
                   <td style="padding: 6px 8px; border: 1px solid #cbd5e1;">${formatDate(item.commissionDate) || '-'}</td>
                   <td style="padding: 6px 8px; border: 1px solid #cbd5e1;">${item.location || '-'}</td>
                   <td style="padding: 6px 8px; border: 1px solid #cbd5e1;">${item.status || '-'}</td>
